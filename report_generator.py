@@ -18,7 +18,7 @@ def read_data(file_name):
     end_date = sheet['A2'].value
 
     sites_stats = {}
-    stats_cols = set([])
+    stats_cols = []
 
     for i in range(4, sheet.max_row):
         site = sheet.cell(row=i, column=1).value
@@ -28,7 +28,10 @@ def read_data(file_name):
         for j in range(2, sheet.max_column + 1):
             stat_cell = sheet.cell(row=i - 2, column=j)
             date_cell = sheet.cell(row=i - 1, column=j)
-            stats_cols.add(stat_cell.value)
+            if not stat_cell or not date_cell:
+                continue
+            if stat_cell.value not in stats_cols:
+                stats_cols.append(stat_cell.value)
             if date_cell.value < start_date or date_cell.value > end_date:
                 continue
             if not sites_stats[site].get(date_cell.value):
@@ -37,7 +40,7 @@ def read_data(file_name):
                 }
             else:
                 sites_stats[site][date_cell.value][stat_cell.value] = sheet.cell(row=i, column=j).value
-    return sites_stats, list(stats_cols)
+    return sites_stats, stats_cols
 
 def generate_report(file_name, sites_stats, stats_cols):
     """
